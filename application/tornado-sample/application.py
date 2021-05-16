@@ -14,6 +14,14 @@ define(
     help='The port that server will listen on.'
 )
 define(
+    'apm', default=False, type=bool,
+    help='enable application apm.'
+)
+define(
+    'apm_server', default='http://localhost:8200', type=str,
+    help='apm erver address.'
+)
+define(
     'debug', default=False, type=bool,
     help='The server run in development mode or not.'
 )
@@ -38,6 +46,14 @@ def main():
         application_settings='default settings',
         debug=options.debug,
     )
+    if options.apm:
+        from elasticapm.contrib.tornado import ElasticAPM
+        application.settings['ELASTIC_APM'] = {
+            'SERVER_URL': options.apm_server,
+            'SERVICE_NAME': 'tornado-sample_apm',
+            'SECRET_TOKEN': 'tornado-sample_secret-token'
+        }
+        apm = ElasticAPM(application)
     logger.info(f'start server, listen on {options.port}.')
     application.listen(options.port)
     current.start()
